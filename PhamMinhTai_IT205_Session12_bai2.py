@@ -1,81 +1,63 @@
-break_line = "===================================================="
-menu_title_text = "TECHBANK SAVINGS MANAGEMENT"
-menu_title = f"{break_line}\n{' ' * ((len(break_line) - len(menu_title_text)) // 2)}{menu_title_text}\n{break_line}"
+# -*- coding: utf-8 -*-
+"""
+He thong quan ly tai khoan tiet kiem TechBank
+Su dung list va dict, xu ly edge cases, khong dung try-except
+"""
 
+# ==================== DU LIEU MAU ====================
 saving_accounts = [
-    {"account_id": "STK001", "customer_name": "Nguyễn Văn An", "balance": 50000000,
-     "term_months": 6, "interest_rate": 6.5, "status": "active"},
-    {"account_id": "STK002", "customer_name": "Trần Thị Bình", "balance": 120000000,
-     "term_months": 12, "interest_rate": 7.2, "status": "active"}
+    {
+        "account_id": "STK001",
+        "customer_name": "Nguyen Van An",
+        "balance": 50000000,
+        "term_months": 6,
+        "interest_rate": 6.5,
+        "status": "active"
+    },
+    {
+        "account_id": "STK002",
+        "customer_name": "Tran Thi Binh",
+        "balance": 120000000,
+        "term_months": 12,
+        "interest_rate": 7.2,
+        "status": "active"
+    }
 ]
 
-while True:
-    print(menu_title)
-    print("1. Xem danh sách sổ tiết kiệm")
-    print("2. Mở sổ tiết kiệm mới")
-    print("3. Cập nhật thông tin sổ tiết kiệm")
-    print("4. Tất toán sổ tiết kiệm")
-    print("5. Tính lãi dự kiến khi đến hạn")
-    print("6. Kiểm tra điều kiện rút trước hạn")
-    print("7. Thoát chương trình")
-    print("-" * 50)
-    chon = input("Mời bạn chọn (1-7): ").strip()
-    if chon not in ("1", "2", "3", "4", "5", "6", "7"):
-        print("Lựa chọn không hợp lệ, vui lòng nhập lại!")
-        continue
-    chon = int(chon)
-
-    # 1. Xem danh sách
-    if chon == 1:
-        if not saving_accounts:
-            print("\nDanh sách sổ tiết kiệm hiện đang trống")
+# ==================== CAC HAM NHAP LIEU ====================
+def get_nonempty_string(prompt):
+    """Nhap chuoi khong duoc de trong"""
+    while True:
+        s = input(prompt).strip()
+        if s == "":
+            print("Loi: Khong duoc de trong!")
         else:
-            print("\n+------+----------------------+--------------+--------+-----------+--------+")
-            print("| STT  | Mã sổ                | Khách hàng   | Số tiền| Kỳ hạn   | Lãi suất| Trạng thái |")
-            print("+------+----------------------+--------------+--------+-----------+--------+")
-            for i, a in enumerate(saving_accounts, 1):
-                print(f"| {i:<4} | {a['account_id']:<6} | {a['customer_name']:<20} | {a['balance']:>10,} | {a['term_months']:>5} tháng | {a['interest_rate']:>5}% | {a['status']:<10} |")
-            print("+------+----------------------+--------------+--------+-----------+--------+")
+            return s
 
-    # 2. Mở sổ mới
-    elif chon == 2:
-        print("\n--- MỞ SỔ TIẾT KIỆM MỚI ---")
-        ma = input("Nhập mã sổ tiết kiệm: ").strip().upper()
-        if ma == "":
-            print("Mã sổ không được để trống!")
+def get_positive_int(prompt):
+    """Nhap so nguyen duong"""
+    while True:
+        s = input(prompt).strip()
+        if not s.isdigit():
+            print("Loi: Vui long nhap so nguyen duong.")
             continue
-        trung = False
-        for a in saving_accounts:
-            if a["account_id"] == ma:
-                trung = True
-                break
-        if trung:
-            print("Mã sổ tiết kiệm đã tồn tại!")
+        n = int(s)
+        if n <= 0:
+            print("Loi: Gia tri phai lon hon 0.")
             continue
-        ten = input("Nhập tên khách hàng: ").strip()
-        if ten == "":
-            print("Tên khách hàng không được để trống!")
+        return n
+
+def get_positive_float(prompt):
+    """Nhap so thuc duong (co the co dau cham)"""
+    while True:
+        s = input(prompt).strip()
+        if s == "":
+            print("Loi: Khong duoc de trong.")
             continue
-        tien_str = input("Nhập số tiền gửi: ").strip()
-        if not tien_str.isdigit():
-            print("Số tiền gửi không hợp lệ!")
-            continue
-        tien = int(tien_str)
-        if tien <= 0:
-            print("Số tiền gửi phải lớn hơn 0!")
-            continue
-        kyhan_str = input("Nhập kỳ hạn gửi theo tháng: ").strip()
-        if not kyhan_str.isdigit():
-            print("Kỳ hạn không hợp lệ!")
-            continue
-        kyhan = int(kyhan_str)
-        if kyhan <= 0:
-            print("Kỳ hạn phải lớn hơn 0!")
-            continue
-        lai_str = input("Nhập lãi suất năm (%): ").strip()
+        # Kiem tra dinh dang so thuc hop le: chu so va toi da 1 dau cham
         valid = True
         dot_count = 0
-        for ch in lai_str:
+        for ch in s:
             if ch == '.':
                 dot_count += 1
                 if dot_count > 1:
@@ -84,154 +66,183 @@ while True:
             elif not ch.isdigit():
                 valid = False
                 break
-        if not valid or lai_str == "":
-            print("Lãi suất không hợp lệ!")
+        if not valid:
+            print("Loi: Vui long nhap so hop le (vi du: 6.5).")
             continue
-        lai = float(lai_str)
-        if lai <= 0:
-            print("Lãi suất phải lớn hơn 0!")
+        val = float(s)
+        if val <= 0:
+            print("Loi: Gia tri phai lon hon 0.")
             continue
-        saving_accounts.append({
-            "account_id": ma,
-            "customer_name": ten,
-            "balance": tien,
-            "term_months": kyhan,
-            "interest_rate": lai,
-            "status": "active"
-        })
-        print("Mở sổ tiết kiệm thành công!")
+        return val
 
-    # 3. Cập nhật
-    elif chon == 3:
-        print("\n--- CẬP NHẬT THÔNG TIN SỔ TIẾT KIỆM ---")
-        ma = input("Nhập mã sổ tiết kiệm cần cập nhật: ").strip().upper()
-        tim = None
-        for a in saving_accounts:
-            if a["account_id"] == ma:
-                tim = a
-                break
-        if tim is None:
-            print("Không tìm thấy mã sổ tiết kiệm!")
-            continue
-        if tim["status"] != "active":
-            print("Không thể cập nhật sổ tiết kiệm đã tất toán!")
-            continue
-        ten = input("Nhập tên khách hàng mới: ").strip()
-        if ten == "":
-            print("Tên không được để trống!")
-            continue
-        tien_str = input("Nhập số tiền gửi mới: ").strip()
-        if not tien_str.isdigit():
-            print("Số tiền không hợp lệ!")
-            continue
-        tien = int(tien_str)
-        if tien <= 0:
-            print("Số tiền phải lớn hơn 0!")
-            continue
-        kyhan_str = input("Nhập kỳ hạn mới: ").strip()
-        if not kyhan_str.isdigit():
-            print("Kỳ hạn không hợp lệ!")
-            continue
-        kyhan = int(kyhan_str)
-        if kyhan <= 0:
-            print("Kỳ hạn phải lớn hơn 0!")
-            continue
-        lai_str = input("Nhập lãi suất mới: ").strip()
-        valid = True
-        dot_count = 0
-        for ch in lai_str:
-            if ch == '.':
-                dot_count += 1
-                if dot_count > 1:
-                    valid = False
-                    break
-            elif not ch.isdigit():
-                valid = False
-                break
-        if not valid or lai_str == "":
-            print("Lãi suất không hợp lệ!")
-            continue
-        lai = float(lai_str)
-        if lai <= 0:
-            print("Lãi suất phải lớn hơn 0!")
-            continue
-        tim["customer_name"] = ten
-        tim["balance"] = tien
-        tim["term_months"] = kyhan
-        tim["interest_rate"] = lai
-        print("Cập nhật thông tin sổ tiết kiệm thành công!")
+# ==================== HAM TIM KIEM ====================
+def find_account(account_id):
+    """Tra ve dict cua so tiet kiem neu ton tai, nguoc lai None"""
+    for acc in saving_accounts:
+        if acc["account_id"] == account_id:
+            return acc
+    return None
 
-    # 4. Tất toán
-    elif chon == 4:
-        print("\n--- TẤT TOÁN SỔ TIẾT KIỆM ---")
-        ma = input("Nhập mã sổ tiết kiệm cần tất toán: ").strip().upper()
-        tim = None
-        for a in saving_accounts:
-            if a["account_id"] == ma:
-                tim = a
-                break
-        if tim is None:
-            print("Không tìm thấy mã sổ tiết kiệm!")
-        else:
-            tim["status"] = "closed"
-            print("Đã tất toán sổ tiết kiệm. Sổ được chuyển sang trạng thái closed.")
+# ==================== CHUC NANG ====================
+def show_menu():
+    print("\n====================================================")
+    print("HE THONG QUAN LY TAI KHOAN TIET KIEM TECHBANK")
+    print("====================================================")
+    print("1. Xem danh sach so tiet kiem")
+    print("2. Mo so tiet kiem moi")
+    print("3. Cap nhat thong tin so tiet kiem")
+    print("4. Tat toan so tiet kiem")
+    print("5. Tinh lai du kien khi den han")
+    print("6. Kiem tra dieu kien rut truoc han")
+    print("7. Thoat chuong trinh")
+    print("----------------------------------------------------")
 
-    # 5. Tính lãi dự kiến
-    elif chon == 5:
-        print("\n--- TÍNH LÃI DỰ KIẾN KHI ĐẾN HẠN ---")
-        ma = input("Nhập mã sổ tiết kiệm: ").strip().upper()
-        tim = None
-        for a in saving_accounts:
-            if a["account_id"] == ma:
-                tim = a
-                break
-        if tim is None:
-            print("Không tìm thấy mã sổ tiết kiệm!")
-        elif tim["status"] != "active":
-            print("Không thể tính lãi cho sổ đã tất toán!")
-        else:
-            lai = tim["balance"] * (tim["interest_rate"] / 100) * (tim["term_months"] / 12)
-            tong = tim["balance"] + lai
-            print(f"Tiền lãi dự kiến: {lai:,.0f}đ")
-            print(f"Tổng tiền nhận khi đến hạn: {tong:,.0f}đ")
+def display_all():
+    """Chuc nang 1: Xem danh sach"""
+    print("\n--- DANH SACH SO TIET KIEM ---")
+    if not saving_accounts:
+        print("Danh sach so tiet kiem hien dang trong")
+        return
+    for i, acc in enumerate(saving_accounts, 1):
+        print(f"{i}. Ma so: {acc['account_id']} | Khach hang: {acc['customer_name']} | "
+              f"So tien gui: {acc['balance']:,} | Ky han: {acc['term_months']} thang | "
+              f"Lai suat: {acc['interest_rate']}%/nam | Trang thai: {acc['status']}")
 
-    # 6. Rút trước hạn
-    elif chon == 6:
-        print("\n--- KIỂM TRA ĐIỀU KIỆN RÚT TRƯỚC HẠN ---")
-        ma = input("Nhập mã sổ tiết kiệm: ").strip().upper()
-        tim = None
-        for a in saving_accounts:
-            if a["account_id"] == ma:
-                tim = a
-                break
-        if tim is None:
-            print("Không tìm thấy mã sổ tiết kiệm!")
+def open_account():
+    """Chuc nang 2: Mo so tiet kiem moi"""
+    print("\n--- MO SO TIET KIEM MOI ---")
+    # Nhap ma so
+    while True:
+        acc_id = input("Nhap ma so tiet kiem: ").strip().upper()
+        if acc_id == "":
+            print("Ma so khong duoc de trong!")
             continue
-        if tim["status"] != "active":
-            print("Không thể thao tác với sổ đã tất toán!")
+        if find_account(acc_id) is not None:
+            print("Ma so tiet kiem da ton tai!")
             continue
-        thang_str = input("Nhập số tháng thực gửi: ").strip()
-        if not thang_str.isdigit():
-            print("Số tháng thực gửi không hợp lệ!")
-            continue
-        thang = int(thang_str)
-        if thang <= 0:
-            print("Số tháng phải lớn hơn 0!")
-            continue
-        if thang < tim["term_months"]:
-            ls = 0.5
-            loai = "lãi suất không kỳ hạn (0.5%/năm)"
-        else:
-            ls = tim["interest_rate"]
-            loai = f"lãi suất đúng hạn ({ls}%/năm)"
-        lai = tim["balance"] * (ls / 100) * (thang / 12)
-        tong = tim["balance"] + lai
-        print(f"\nKết quả: Rút {'trước hạn' if thang < tim['term_months'] else 'đúng hạn'}")
-        print(f"Áp dụng: {loai}")
-        print(f"Tiền lãi thực nhận: {lai:,.0f}đ")
-        print(f"Tổng tiền thực nhận: {tong:,.0f}đ")
-
-    # 7. Thoát
-    elif chon == 7:
-        print("Cảm ơn bạn đã sử dụng hệ thống! Tạm biệt.")
         break
+    # Nhap ten khach hang
+    name = get_nonempty_string("Nhap ten khach hang: ")
+    # Nhap so tien gui
+    balance = get_positive_int("Nhap so tien gui: ")
+    # Nhap ky han
+    term = get_positive_int("Nhap ky han gui theo thang: ")
+    # Nhap lai suat
+    rate = get_positive_float("Nhap lai suat nam (%): ")
+    # Them moi
+    saving_accounts.append({
+        "account_id": acc_id,
+        "customer_name": name,
+        "balance": balance,
+        "term_months": term,
+        "interest_rate": rate,
+        "status": "active"
+    })
+    print("Mo so tiet kiem thanh cong!")
+
+def update_account():
+    """Chuc nang 3: Cap nhat thong tin so tiet kiem"""
+    print("\n--- CAP NHAT SO TIET KIEM ---")
+    acc_id = input("Nhap ma so can cap nhat: ").strip().upper()
+    acc = find_account(acc_id)
+    if acc is None:
+        print("Khong tim thay ma so tiet kiem!")
+        return
+    if acc["status"] != "active":
+        print("Khong the cap nhat so tiet kiem da tat toan!")
+        return
+    # Nhap thong tin moi
+    new_name = get_nonempty_string("Nhap ten khach hang moi: ")
+    new_balance = get_positive_int("Nhap so tien gui moi: ")
+    new_term = get_positive_int("Nhap ky han moi theo thang: ")
+    new_rate = get_positive_float("Nhap lai suat nam moi: ")
+    # Cap nhat
+    acc["customer_name"] = new_name
+    acc["balance"] = new_balance
+    acc["term_months"] = new_term
+    acc["interest_rate"] = new_rate
+    print("Cap nhat thong tin so tiet kiem thanh cong!")
+
+def close_account():
+    """Chuc nang 4: Tat toan so (chuyen trang thai thanh closed)"""
+    print("\n--- TAT TOAN SO TIET KIEM ---")
+    acc_id = input("Nhap ma so can tat toan: ").strip().upper()
+    acc = find_account(acc_id)
+    if acc is None:
+        print("Khong tim thay ma so tiet kiem!")
+        return
+    acc["status"] = "closed"
+    print("Da tat toan so tiet kiem. So duoc chuyen sang trang thai closed.")
+
+def calculate_interest():
+    """Chuc nang 5: Tinh lai du kien khi den han"""
+    print("\n--- TINH LAI DU KIEN ---")
+    acc_id = input("Nhap ma so tiet kiem: ").strip().upper()
+    acc = find_account(acc_id)
+    if acc is None:
+        print("Khong tim thay ma so tiet kiem!")
+        return
+    if acc["status"] != "active":
+        print("Khong the tinh lai cho so da tat toan!")
+        return
+    interest = acc["balance"] * (acc["interest_rate"] / 100) * (acc["term_months"] / 12)
+    total = acc["balance"] + interest
+    print(f"Tien lai du kien khi den han: {interest:,.0f}d")
+    print(f"Tong tien nhan khi den han: {total:,.0f}d")
+
+def early_withdrawal():
+    """Chuc nang 6: Kiem tra rut truoc han"""
+    print("\n--- KIEM TRA RUT TRUOC HAN ---")
+    acc_id = input("Nhap ma so tiet kiem: ").strip().upper()
+    acc = find_account(acc_id)
+    if acc is None:
+        print("Khong tim thay ma so tiet kiem!")
+        return
+    if acc["status"] != "active":
+        print("Khong the thao tac voi so da tat toan!")
+        return
+    months = get_positive_int("Nhap so thang thuc gui: ")
+    if months < acc["term_months"]:
+        rate = 0.5
+        loai = "lai suat khong ky han (0.5%/nam)"
+    else:
+        rate = acc["interest_rate"]
+        loai = f"lai suat dung han ({rate}%/nam)"
+    interest = acc["balance"] * (rate / 100) * (months / 12)
+    total = acc["balance"] + interest
+    print(f"\nKet qua: Rut {'truoc han' if months < acc['term_months'] else 'dung han'}")
+    print(f"Ap dung: {loai}")
+    print(f"Tien lai thuc nhan: {interest:,.0f}d")
+    print(f"Tong tien thuc nhan: {total:,.0f}d")
+
+# ==================== CHUONG TRINH CHINH ====================
+def main():
+    while True:
+        show_menu()
+        choice = input("Moi ban chon (1-7): ").strip()
+        if not choice.isdigit():
+            print("Lua chon khong hop le, vui long nhap lai!")
+            continue
+        choice = int(choice)
+        if choice < 1 or choice > 7:
+            print("Lua chon khong hop le, vui long nhap lai!")
+            continue
+
+        if choice == 1:
+            display_all()
+        elif choice == 2:
+            open_account()
+        elif choice == 3:
+            update_account()
+        elif choice == 4:
+            close_account()
+        elif choice == 5:
+            calculate_interest()
+        elif choice == 6:
+            early_withdrawal()
+        elif choice == 7:
+            print("\nCam on ban da su dung he thong. Tam biet!")
+            break
+
+if __name__ == "__main__":
+    main()
